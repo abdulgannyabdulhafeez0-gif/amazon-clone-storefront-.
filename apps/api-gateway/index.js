@@ -1,30 +1,37 @@
 
 const express = require('express');
-const { createProxyMiddleware } = require('http-proxy-middleware');
-const path = require('path'); // 1. Added path module
+const path = require('path');
 
 const app = express();
 
-// 2. Serve your frontend folder publicly (placed before routes so it loads index.html at root)
+// Crucial: Parse incoming JSON data from your frontend
+app.use(express.json());
+
+// Serve your frontend folder publicly
 app.use(express.static(path.join(__dirname, '../../frontend')));
 
-// Route to User Service with pathRewrite
-app.use('/users', createProxyMiddleware({ 
-    target: 'http://localhost:3001', 
-    changeOrigin: true,
-    pathRewrite: { '^/users': '' }
-}));
+// In-memory cart database for your demo
+const userCarts = {};
 
-// Route to Cart Service with pathRewrite
-app.use('/cart', createProxyMiddleware({ 
-    target: 'http://localhost:3002', 
-    changeOrigin: true,
-    pathRewrite: { '^/cart': '' }
-}));
+// Handle Add to Cart requests directly
+app.post('/cart/:userId', (req, res) => {
+    const { userId } = req.params;
+    const { item, price } = req.body;
 
-// Fallback home route (optional now that static frontend is active)
-app.get('/api-status', (req, res) => {
-    res.send('API Gateway is online and ready to route traffic!');
+    if (!userCarts[userId]) {
+        userCarts[userId] = [];
+    }
+
+    userCarts[userId].push({ item, price });
+    
+    console.log(`Added ${item} to ${userId}'s cart. Total items: ${userCarts[userId].length}`);
+
+    // Send back a success response with the updated count
+    res.json({ 
+        success: true, 
+        message: 'Item added successfully', 
+        cartCount: userCarts[userId].length 
+    });
 });
 
 const PORT = process.env.PORT || 3000;
