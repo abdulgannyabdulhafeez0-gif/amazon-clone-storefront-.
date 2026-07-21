@@ -14,7 +14,7 @@ app.use('/cart', createProxyMiddleware({
     target: 'http://localhost:3002', 
     changeOrigin: true 
 }));
-
-app.listen(3000, () => {
-    console.log('API Gateway running on port 3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`API Gateway running on port ${PORT}`);
 });
