@@ -15,24 +15,122 @@
             background-color: #131921;
             color: white;
             padding: 15px;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        main {
-            padding: 20px;
+        h2 { margin: 0; font-size: 1.2rem; }
+        #cart-status { font-weight: bold; }
+        main { padding: 10px; }
+        
+        /* Mobile-optimized product cards */
+        .product-card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .product-image {
+            width: 100%;
+            height: 150px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .product-title {
+            font-size: 1.1rem;
+            margin: 0 0 5px 0;
+            color: #0F1111;
+        }
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #B12704;
+            margin-bottom: 10px;
+        }
+        .add-to-cart-btn {
+            background-color: #FFD814;
+            border: 1px solid #FCD200;
+            width: 100%;
+            padding: 12px;
+            border-radius: 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(213,217,217,0.5);
         }
     </style>
 </head>
 <body>
     <header>
         <h2>Amazon Clone</h2>
-        <div id="cart-status">Cart: 0 items</div>
+        <div id="cart-status">🛒 0 items</div>
     </header>
 
     <main>
-        <h3>Recommended for you</h3>
         <div id="product-list">
-            <!-- Products will be loaded here later -->
+            <!-- Sample Product 1 -->
+            <div class="product-card">
+                <div class="product-image"></div>
+                <h4 class="product-title">Wireless Bluetooth Earbuds</h4>
+                <div class="product-price">$29.99</div>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+            
+            <!-- Sample Product 2 -->
+            <div class="product-card">
+                <div class="product-image"></div>
+                <h4 class="product-title">Retro Gaming Handheld</h4>
+                <div class="product-price">$49.99</div>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
         </div>
-    </main>
+    </main> 
+        <script>
+        // REPLACE THIS with your actual Railway URL!
+        const API_BASE_URL = 'https://YOUR-APP-NAME.up.railway.app'; 
+        const USER_ID = 'user1'; 
+
+        async function addToCart(productName, price) {
+            const cartStatus = document.getElementById('cart-status');
+            
+            // Give immediate visual feedback 
+            cartStatus.innerText = '🛒 Adding...';
+
+            try {
+                // Send the request to your unified API Gateway
+                const response = await fetch(`${API_BASE_URL}/cart/${USER_ID}`, {
+                    method: 'POST', 
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ item: productName, price: price })
+                });
+
+                if (response.ok) {
+                    // Update UI to show success
+                    cartStatus.innerText = '🛒 Added!';
+                    setTimeout(() => cartStatus.innerText = '🛒 1 item', 2000); 
+                } else {
+                    cartStatus.innerText = '🛒 Error';
+                }
+            } catch (error) {
+                console.error('Connection failed:', error);
+                cartStatus.innerText = '🛒 Offline';
+            }
+        }
+
+        // Attach this function to your buttons
+        const buttons = document.querySelectorAll('.add-to-cart-btn');
+        const titles = ['Wireless Bluetooth Earbuds', 'Retro Gaming Handheld'];
+        const prices = [29.99, 49.99];
+
+        buttons.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                addToCart(titles[index], prices[index]);
+            });
+        });
+    </script>
+
 </body>
 </html>
