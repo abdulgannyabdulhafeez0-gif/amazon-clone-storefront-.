@@ -1,25 +1,29 @@
 
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const path = require('path'); // 1. Added path module
 
 const app = express();
+
+// 2. Serve your frontend folder publicly (placed before routes so it loads index.html at root)
+app.use(express.static(path.join(__dirname, '../../frontend')));
 
 // Route to User Service with pathRewrite
 app.use('/users', createProxyMiddleware({ 
     target: 'http://localhost:3001', 
     changeOrigin: true,
-    pathRewrite: { '^/users': '' } // This hides the "/users" from the internal service
+    pathRewrite: { '^/users': '' }
 }));
 
 // Route to Cart Service with pathRewrite
 app.use('/cart', createProxyMiddleware({ 
     target: 'http://localhost:3002', 
     changeOrigin: true,
-    pathRewrite: { '^/cart': '' } // This hides the "/cart" from the internal service
+    pathRewrite: { '^/cart': '' }
 }));
 
-// Fallback home route
-app.get('/', (req, res) => {
+// Fallback home route (optional now that static frontend is active)
+app.get('/api-status', (req, res) => {
     res.send('API Gateway is online and ready to route traffic!');
 });
 
